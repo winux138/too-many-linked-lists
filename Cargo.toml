@@ -7,6 +7,10 @@ edition = "2024"
 name = "first"
 path = "src/bin/bad_stack.rs"
 
+[[bin]]
+name = "second"
+path = "src/bin/ok_stack.rs"
+
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
