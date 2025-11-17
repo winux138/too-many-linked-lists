@@ -1,60 +1,48 @@
-use std::mem;
-
 #[derive(Debug)]
-struct List {
-    head: Link,
+struct List<T> {
+    head: Link<T>,
 }
 
-#[derive(Debug)]
-enum Link {
-    Empty,
-    More(Box<Node>),
-}
+type Link<T> = Option<Box<Node<T>>>;
 
 #[derive(Debug)]
-struct Node {
-    value: i32,
-    next: Link,
+struct Node<T> {
+    value: T,
+    next: Link<T>,
 }
 
-impl List {
+impl<T> List<T> {
     const fn new() -> Self {
-        Self { head: Link::Empty }
+        Self { head: Option::None }
     }
 
-    fn push(&mut self, v: i32) {
-        self.head = Link::More(Box::new(Node {
+    fn push(&mut self, v: T) {
+        self.head = Option::Some(Box::new(Node {
             value: v,
-            next: mem::replace(&mut self.head, Link::Empty),
+            next: self.head.take(),
         }));
     }
 
-    fn pop(&mut self) -> Option<i32> {
-        match mem::replace(&mut self.head, Link::Empty) {
-            Link::Empty => None,
-            Link::More(node) => {
-                self.head = node.next;
-                Some(node.value)
-            }
-        }
+    fn pop(&mut self) -> Option<T> {
+        self.head.take().map(|node| {
+            self.head = node.next;
+            node.value
+        })
     }
 }
 
-impl Drop for List {
+impl<T> Drop for List<T> {
     fn drop(&mut self) {
-        let mut cur_link = mem::replace(&mut self.head, Link::Empty);
-        while let Link::More(mut boxed_node) = cur_link {
-            cur_link = mem::replace(&mut boxed_node.next, Link::Empty);
-            // boxed_node goes out of scope and gets dropped here;
-            // but its Node's `next` field has been set to Link::Empty
-            // so no unbounded recursion occurs.
+        let mut cur_link = self.head.take();
+        while let Option::Some(mut boxed_node) = cur_link {
+            cur_link = boxed_node.next.take();
         }
     }
 }
 
 fn main() {
     let mut list = List::new();
-    list.push(1);
+    list.push(1u16);
     list.push(2);
     list.push(3);
     list.push(4);
