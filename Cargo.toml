@@ -3,6 +3,10 @@ name = "too_many_linked_lists"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "first"
+path = "src/bin/bad_stack.rs"
+
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
